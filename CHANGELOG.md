@@ -19,5 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Attachment metadata (filename, MIME type, decoded size) included in output without embedding content.
 - `--pretty` flag for human-readable JSON output.
 
+### Fixed
+
+- `<` and `>` characters in message IDs and email addresses were HTML-escaped (`\u003c`, `\u003e`) in `--pretty` mode. Both JSONL and pretty modes now use `SetEscapeHTML(false)`.
+
 
 [0.1.0]: https://github.com/nlink-jp/lite-eml/releases/tag/v0.1.0
