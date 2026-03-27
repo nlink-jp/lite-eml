@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -114,15 +115,15 @@ func newEncoder(w io.Writer, pretty bool) *encoder {
 }
 
 func (e *encoder) write(v any) error {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
 	if e.pretty {
-		b, err := json.MarshalIndent(v, "", "  ")
-		if err != nil {
-			return err
-		}
-		_, err = fmt.Fprintf(e.w, "%s\n", b)
+		enc.SetIndent("", "  ")
+	}
+	if err := enc.Encode(v); err != nil {
 		return err
 	}
-	enc := json.NewEncoder(e.w)
-	enc.SetEscapeHTML(false)
-	return enc.Encode(v)
+	_, err := e.w.Write(buf.Bytes())
+	return err
 }
