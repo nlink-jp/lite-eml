@@ -11,6 +11,16 @@ import (
 	"strings"
 )
 
+const (
+	// maxMIMEDepth limits recursive MIME nesting to prevent stack exhaustion from
+	// maliciously crafted deeply-nested multipart messages.
+	maxMIMEDepth = 10
+
+	// maxPartSize is the maximum number of bytes read from a single MIME part
+	// body after transfer-decoding. Prevents memory exhaustion from huge parts.
+	maxPartSize = 25 * 1024 * 1024 // 25 MiB
+)
+
 // parseResult holds the output of recursive MIME part processing.
 type parseResult struct {
 	bodyParts   []BodyPart
@@ -22,27 +32,34 @@ type parseResult struct {
 // contentTypeHeader is the value of the Content-Type header for this part.
 // cte is the Content-Transfer-Encoding header value for the top-level message.
 func parseBody(contentTypeHeader, cte string, body io.Reader) (*parseResult, error) {
+	return parseBodyDepth(contentTypeHeader, cte, body, 0)
+}
+
+func parseBodyDepth(contentTypeHeader, cte string, body io.Reader, depth int) (*parseResult, error) {
 	if contentTypeHeader == "" {
 		contentTypeHeader = "text/plain"
 	}
 	mediaType, params, err := mime.ParseMediaType(contentTypeHeader)
 	if err != nil {
 		// Unparseable Content-Type — read as plain text.
-		data, _ := io.ReadAll(body)
+		data, _ := io.ReadAll(io.LimitReader(body, maxPartSize))
 		return &parseResult{
 			bodyParts: []BodyPart{{Type: "text/plain", Content: string(data)}},
 		}, nil
 	}
 
 	if strings.HasPrefix(mediaType, "multipart/") {
-		return parseMultipart(mediaType, params["boundary"], body)
+		if depth >= maxMIMEDepth {
+			return &parseResult{bodyParts: []BodyPart{}, attachments: []Attachment{}}, nil
+		}
+		return parseMultipart(mediaType, params["boundary"], body, depth)
 	}
 
 	return parseSinglePart(mediaType, params["charset"], cte, body)
 }
 
 // parseMultipart recursively processes a multipart/* MIME entity.
-func parseMultipart(mediaType, boundary string, body io.Reader) (*parseResult, error) {
+func parseMultipart(mediaType, boundary string, body io.Reader, depth int) (*parseResult, error) {
 	result := &parseResult{
 		bodyParts:   []BodyPart{},
 		attachments: []Attachment{},
@@ -58,7 +75,7 @@ func parseMultipart(mediaType, boundary string, body io.Reader) (*parseResult, e
 			break // tolerate malformed parts
 		}
 
-		sub, err := processRawPart(part.Header, part)
+		sub, err := processRawPart(part.Header, part, depth+1)
 		part.Close()
 		if err != nil {
 			continue
@@ -78,7 +95,7 @@ func parseMultipart(mediaType, boundary string, body io.Reader) (*parseResult, e
 }
 
 // processRawPart decides whether a raw MIME part is a body section or an attachment.
-func processRawPart(h textproto.MIMEHeader, body io.Reader) (*parseResult, error) {
+func processRawPart(h textproto.MIMEHeader, body io.Reader, depth int) (*parseResult, error) {
 	ct := h.Get("Content-Type")
 	if ct == "" {
 		ct = "text/plain"
@@ -93,9 +110,12 @@ func processRawPart(h textproto.MIMEHeader, body io.Reader) (*parseResult, error
 	cte := h.Get("Content-Transfer-Encoding")
 	cd := h.Get("Content-Disposition")
 
-	// Nested multipart: recurse.
+	// Nested multipart: recurse if within depth limit.
 	if strings.HasPrefix(mediaType, "multipart/") {
-		return parseMultipart(mediaType, params["boundary"], body)
+		if depth >= maxMIMEDepth {
+			return &parseResult{bodyParts: []BodyPart{}, attachments: []Attachment{}}, nil
+		}
+		return parseMultipart(mediaType, params["boundary"], body, depth)
 	}
 
 	// Determine if this part is an attachment or inline body.
@@ -170,15 +190,17 @@ func parseSinglePart(mediaType, charset, cte string, body io.Reader) (*parseResu
 }
 
 // decodeTransfer applies the Content-Transfer-Encoding to produce raw bytes.
+// The decoded output is capped at maxPartSize to prevent memory exhaustion.
 func decodeTransfer(cte string, r io.Reader) ([]byte, error) {
+	limited := io.LimitReader(r, maxPartSize)
 	switch strings.ToLower(strings.TrimSpace(cte)) {
 	case "base64":
-		return io.ReadAll(base64.NewDecoder(base64.StdEncoding, newBase64Cleaner(r)))
+		return io.ReadAll(base64.NewDecoder(base64.StdEncoding, newBase64Cleaner(limited)))
 	case "quoted-printable":
-		return io.ReadAll(quotedprintable.NewReader(r))
+		return io.ReadAll(quotedprintable.NewReader(limited))
 	default:
 		// 7bit, 8bit, binary, or empty — read as-is.
-		return io.ReadAll(r)
+		return io.ReadAll(limited)
 	}
 }
 
