@@ -2,7 +2,7 @@
 
 ## 目的
 
-lite-eml は RFC 2822 形式の EML ファイルをパースし、構造化された JSONL を stdout に出力します。
+eml-to-jsonl は RFC 2822 形式の EML ファイルをパースし、構造化された JSONL を stdout に出力します。
 lite-llm などのダウンストリームツールへ入力するための Unix フィルターとして設計されています。
 
 ## 入力処理
@@ -10,9 +10,9 @@ lite-llm などのダウンストリームツールへ入力するための Unix
 | 入力ソース | 方法 |
 |-----------|------|
 | stdin | 引数なしの場合のデフォルト |
-| ファイル引数 | `lite-eml file.eml` |
-| ディレクトリ引数 | `lite-eml dir/` — ディレクトリ直下の `*.eml` を一括処理（再帰なし） |
-| 混在 | `lite-eml dir/ extra.eml` — 指定順に処理 |
+| ファイル引数 | `eml-to-jsonl file.eml` |
+| ディレクトリ引数 | `eml-to-jsonl dir/` — ディレクトリ直下の `*.eml` を一括処理（再帰なし） |
+| 混在 | `eml-to-jsonl dir/ extra.eml` — 指定順に処理 |
 
 個別ファイルのエラーは stderr に出力し、残りのファイルの処理を継続します。
 1件でも失敗した場合、終了コードは 1 になります。

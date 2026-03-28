@@ -4,15 +4,15 @@
 
 - Go 1.22 or later
 
-No LLM API is required — lite-eml is a pure parser with no network calls.
+No LLM API is required — eml-to-jsonl is a pure parser with no network calls.
 
 ## Installation
 
 ```sh
-git clone https://github.com/nlink-jp/lite-eml.git
-cd lite-eml
+git clone https://github.com/nlink-jp/eml-to-jsonl.git
+cd eml-to-jsonl
 make build
-# Add bin/ to PATH or copy bin/lite-eml to a directory on PATH
+# Add bin/ to PATH or copy bin/eml-to-jsonl to a directory on PATH
 ```
 
 ## Git hooks
@@ -27,14 +27,14 @@ Installs `pre-commit` (vet + lint) and `pre-push` (full check) hooks.
 
 ```sh
 # Parse a single EML file
-lite-eml message.eml
+eml-to-jsonl message.eml
 
 # Parse all EML files in a directory
-lite-eml ~/Downloads/exported-mail/
+eml-to-jsonl ~/Downloads/exported-mail/
 
 # Pretty-print for inspection
-lite-eml --pretty message.eml | head -40
+eml-to-jsonl --pretty message.eml | head -40
 
 # Pipe into lite-llm
-lite-eml inbox/ | lite-llm -p "List the sender and subject of each email."
+eml-to-jsonl inbox/ | lite-llm -p "List the sender and subject of each email."
 ```

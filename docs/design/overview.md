@@ -2,7 +2,7 @@
 
 ## Purpose
 
-lite-eml parses RFC 2822 EML files and outputs structured JSONL to stdout.
+eml-to-jsonl parses RFC 2822 EML files and outputs structured JSONL to stdout.
 It is designed as a Unix filter that feeds into downstream analysis tools such as lite-llm.
 
 ## Input handling
@@ -10,9 +10,9 @@ It is designed as a Unix filter that feeds into downstream analysis tools such a
 | Source | How |
 |--------|-----|
 | stdin | Default when no arguments are given |
-| File argument | `lite-eml file.eml` |
-| Directory argument | `lite-eml dir/` — globs `*.eml` directly in the directory (non-recursive) |
-| Mixed | `lite-eml dir/ extra.eml` — processed in order |
+| File argument | `eml-to-jsonl file.eml` |
+| Directory argument | `eml-to-jsonl dir/` — globs `*.eml` directly in the directory (non-recursive) |
+| Mixed | `eml-to-jsonl dir/ extra.eml` — processed in order |
 
 Errors on individual files are reported to stderr; processing continues with remaining files.
 Exit code is 1 if any file failed.

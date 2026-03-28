@@ -1,4 +1,4 @@
-# lite-eml
+# eml-to-jsonl
 
 シェルパイプライン向け EML パーサー。
 `.eml` ファイルを読み込み、構造化された JSONL（1メール1行）を stdout に出力します。
@@ -18,32 +18,32 @@
 ## インストール
 
 ```sh
-git clone https://github.com/nlink-jp/lite-eml.git
-cd lite-eml
+git clone https://github.com/nlink-jp/eml-to-jsonl.git
+cd eml-to-jsonl
 make build
-# bin/ を PATH に追加するか、bin/lite-eml を PATH 上のディレクトリにコピーしてください
+# bin/ を PATH に追加するか、bin/eml-to-jsonl を PATH 上のディレクトリにコピーしてください
 ```
 
 ## 使い方
 
 ```sh
 # 単一ファイル
-lite-eml message.eml
+eml-to-jsonl message.eml
 
 # 複数ファイル
-lite-eml mail1.eml mail2.eml
+eml-to-jsonl mail1.eml mail2.eml
 
 # ディレクトリ（*.eml を一括処理）
-lite-eml ~/exported-mail/
+eml-to-jsonl ~/exported-mail/
 
 # 標準入力から
-cat message.eml | lite-eml
+cat message.eml | eml-to-jsonl
 
 # 整形出力（人間向け確認用）
-lite-eml --pretty message.eml
+eml-to-jsonl --pretty message.eml
 
 # lite-llm へパイプしてメール分析
-lite-eml inbox/ | lite-llm -p "各メールを1文で要約してください。"
+eml-to-jsonl inbox/ | lite-llm -p "各メールを1文で要約してください。"
 ```
 
 ## 出力フォーマット
@@ -107,7 +107,7 @@ make check       # vet + lint + test + build + govulncheck
 - [docs/ja/setup.md](docs/ja/setup.md) — セットアップガイド
 - [docs/dependencies.md](docs/dependencies.md) — 外部依存ライブラリ
 
-## lite-series について
+## util-series について
 
-lite-eml は [lite-series](https://github.com/nlink-jp/lite-series) の一部です。
-lite-series はローカル・クラウド LLM と連携する軽量 CLI ツール群です。
+eml-to-jsonl は [util-series](https://github.com/nlink-jp/util-series) の一部です。
+util-series はローカル・クラウド LLM と連携する軽量 CLI ツール群です。

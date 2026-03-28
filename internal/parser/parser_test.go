@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nlink-jp/lite-eml/internal/parser"
+	"github.com/nlink-jp/eml-to-jsonl/internal/parser"
 )
 
 func TestParse_SimpleText(t *testing.T) {

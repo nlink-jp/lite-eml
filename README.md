@@ -1,4 +1,4 @@
-# lite-eml
+# eml-to-jsonl
 
 EML parser for shell pipelines.
 Reads `.eml` files and outputs structured JSONL — one JSON object per message — to stdout.
@@ -17,32 +17,32 @@ Designed to compose with [lite-llm](https://github.com/nlink-jp/lite-llm) and ot
 ## Installation
 
 ```sh
-git clone https://github.com/nlink-jp/lite-eml.git
-cd lite-eml
+git clone https://github.com/nlink-jp/eml-to-jsonl.git
+cd eml-to-jsonl
 make build
-# Add bin/ to PATH or copy bin/lite-eml to a directory on PATH
+# Add bin/ to PATH or copy bin/eml-to-jsonl to a directory on PATH
 ```
 
 ## Usage
 
 ```sh
 # Single file
-lite-eml message.eml
+eml-to-jsonl message.eml
 
 # Multiple files
-lite-eml mail1.eml mail2.eml
+eml-to-jsonl mail1.eml mail2.eml
 
 # Directory (processes all *.eml)
-lite-eml ~/exported-mail/
+eml-to-jsonl ~/exported-mail/
 
 # Stdin
-cat message.eml | lite-eml
+cat message.eml | eml-to-jsonl
 
 # Pretty-print for inspection
-lite-eml --pretty message.eml
+eml-to-jsonl --pretty message.eml
 
 # Pipe into lite-llm for analysis
-lite-eml inbox/ | lite-llm -p "Summarise each email in one sentence."
+eml-to-jsonl inbox/ | lite-llm -p "Summarise each email in one sentence."
 ```
 
 ## Output format
@@ -107,7 +107,7 @@ make check       # vet + lint + test + build + govulncheck
 - [docs/setup.md](docs/setup.md) — detailed setup guide
 - [docs/dependencies.md](docs/dependencies.md) — third-party dependencies
 
-## Part of lite-series
+## Part of util-series
 
-lite-eml is part of the [lite-series](https://github.com/nlink-jp/lite-series) —
+eml-to-jsonl is part of the [util-series](https://github.com/nlink-jp/util-series) —
 a collection of lightweight CLI tools for working with local and cloud LLMs.

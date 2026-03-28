@@ -1,4 +1,4 @@
-module github.com/nlink-jp/lite-eml
+module github.com/nlink-jp/eml-to-jsonl
 
 go 1.26.1
 
